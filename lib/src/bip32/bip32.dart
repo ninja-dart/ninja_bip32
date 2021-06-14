@@ -1,20 +1,21 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ethhdwallet/src/util/util.dart';
+import 'package:hdwallet/src/util/util.dart';
 
 class ExtendedPrivateKey {
   final Uint8List privateKey;
   final Uint8List chainCode;
-  late Uint8List publicKey;
+  late PublicKey publicKey;
 
   ExtendedPrivateKey(this.privateKey, this.chainCode) {
     publicKey = privateKeyToPublicKey(privateKey);
   }
 
   ExtendedPrivateKey generateHardenedChildKey(int index) {
-    if(index < hardenBit) {
-      throw ArgumentError('index should be greater than or equal to $hardenBit');
+    if (index < hardenBit) {
+      throw ArgumentError(
+          'index should be greater than or equal to $hardenBit');
     }
     final data = Uint8List(37);
     data[0] = 0x00;
@@ -29,7 +30,7 @@ class ExtendedPrivateKey {
   }
 
   ExtendedPublicKey generateNonHardenedChildKey(int index) {
-    if(index >= hardenBit) {
+    if (index >= hardenBit) {
       throw ArgumentError('index should be less than $hardenBit');
     }
     // TODO
@@ -64,7 +65,28 @@ class MasterKey extends ExtendedPrivateKey {
   // TODO
 }
 
-class ExtendedPublicKey {
+class PublicKey {
+  final BigInt x;
+
+  final BigInt y;
+
+  PublicKey(this.x, this.y);
+
+  /*Uint8List encode() {
+    final len = 32;
+    final x = bigIntToBytes(point.first, outLen: len);
+    final y = bigIntToBytes(point.last, outLen: len);
+    final bytes = Uint8List(2 * len + 1);
+    bytes.setAll(1, x);
+    bytes.setAll(len + 1, y);
+    return bytes;
+  }*/
+  @override
+  String toString() => 'PublicKey($x, $y)';
+}
+
+class ExtendedPublicKey extends PublicKey {
+  ExtendedPublicKey(BigInt x, BigInt y) : super(x, y);
   // TODO
 }
 
