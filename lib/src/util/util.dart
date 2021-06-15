@@ -13,8 +13,12 @@ extension IntListToUint8List on List<int> {
   Uint8List toUint8List() => Uint8List.fromList(this);
 }
 
-PublicKey privateKeyToPublicKey(Uint8List privateKey) {
-  final point = base.getPointByBig(bytesToBigInt(privateKey), base.secp256k1.p,
-      base.secp256k1.a, base.secp256k1.G);
+extension BigIntExt on BigInt {
+  Uint8List toBytes({int? outLen}) => bigIntToBytes(this, outLen: outLen);
+}
+
+PublicKey privateKeyToPublicKey(BigInt privateKey) {
+  final point = base.getPointByBig(
+      privateKey, base.secp256k1.p, base.secp256k1.a, base.secp256k1.G);
   return PublicKey(point.first, point.last);
 }

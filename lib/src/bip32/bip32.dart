@@ -2,15 +2,43 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:hdwallet/src/util/util.dart';
+import 'package:ninja/ninja.dart';
 
-class ExtendedPrivateKey {
-  final Uint8List privateKey;
-  final Uint8List chainCode;
+class PrivateKey {
+  final BigInt privateKey;
   late PublicKey publicKey;
 
-  ExtendedPrivateKey(this.privateKey, this.chainCode) {
+  PrivateKey(this.privateKey) {
     publicKey = privateKeyToPublicKey(privateKey);
   }
+
+  factory PrivateKey.fromIntString(String intString) {
+    final privateKey = BigInt.tryParse(intString);
+    if (privateKey == null) {
+      throw ArgumentError('Invalid int string');
+    }
+
+    return PrivateKey(privateKey);
+  }
+
+  factory PrivateKey.fromHexString(String intString) {
+    final privateKey = BigInt.tryParse(intString, radix: 16);
+    if (privateKey == null) {
+      throw ArgumentError('Invalid int string');
+    }
+
+    return PrivateKey(privateKey);
+  }
+
+  factory PrivateKey.fromBytes(Iterable<int> bytes) {
+    return PrivateKey(bytesToBigInt(bytes));
+  }
+}
+
+class ExtendedPrivateKey extends PrivateKey {
+  final Uint8List chainCode;
+
+  ExtendedPrivateKey(BigInt privateKey, this.chainCode) : super(privateKey);
 
   ExtendedPrivateKey generateHardenedChildKey(int index) {
     if (index < hardenBit) {
@@ -19,11 +47,11 @@ class ExtendedPrivateKey {
     }
     final data = Uint8List(37);
     data[0] = 0x00;
-    data.setRange(1, 33, privateKey);
+    data.setRange(1, 33, privateKey.toBytes());
     data.buffer.asByteData().setUint32(33, index);
-    final whole = hmacSHA512(this.chainCode, data);
-    final key = whole.sublist(0, 32).toUint8List();
-    final chainCode = whole.sublist(32).toUint8List();
+    final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
+    final key = bytesToBigInt(whole.sublist(0, 32));
+    final chainCode = whole.sublist(32);
     // TODO check that key is less than G
     // TODO check that chainCode is less than G
     return ExtendedPrivateKey(key, chainCode);
@@ -40,7 +68,7 @@ class ExtendedPrivateKey {
 }
 
 class MasterKey extends ExtendedPrivateKey {
-  MasterKey(Uint8List key, Uint8List chainCode) : super(key, chainCode);
+  MasterKey(BigInt key, Uint8List chainCode) : super(key, chainCode);
 
   factory MasterKey.fromSeed(Uint8List seed,
       {/* String | List<int> */ salt = 'Bitcoin seed'}) {
@@ -58,7 +86,7 @@ class MasterKey extends ExtendedPrivateKey {
           'salt should be either String or List<int>. got ${salt.runtimeType.toString()}');
     }
     final whole = hmacSHA512(salt, seed);
-    final key = whole.sublist(0, 32).toUint8List();
+    final key = bytesToBigInt(whole.sublist(0, 32));
     final chainCode = whole.sublist(32).toUint8List();
     return MasterKey(key, chainCode);
   }
