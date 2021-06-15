@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:hdwallet/src/util/util.dart';
 import 'package:ninja/ninja.dart';
+import 'package:web3dart/crypto.dart';
 
 class PrivateKey {
   final BigInt privateKey;
@@ -100,15 +101,23 @@ class PublicKey {
 
   PublicKey(this.x, this.y);
 
-  /*Uint8List encode() {
-    final len = 32;
-    final x = bigIntToBytes(point.first, outLen: len);
-    final y = bigIntToBytes(point.last, outLen: len);
-    final bytes = Uint8List(2 * len + 1);
-    bytes.setAll(1, x);
-    bytes.setAll(len + 1, y);
-    return bytes;
-  }*/
+  String encode({bool compressed = true}) {
+    final pointLen = 32;
+    final xBytes = bigIntToBytes(x, outLen: pointLen);
+
+    if(!compressed) {
+      final yBytes = bigIntToBytes(y, outLen: pointLen);
+      final bytes = Uint8List(2 * pointLen + 1);
+      bytes[0] = 0x04;
+      bytes.setAll(1, xBytes);
+      bytes.setAll(pointLen + 1, yBytes);
+      return bytesToHex(bytes);
+    } else {
+      // TODO
+      throw UnimplementedError();
+    }
+  }
+
   @override
   String toString() => 'PublicKey($x, $y)';
 }
