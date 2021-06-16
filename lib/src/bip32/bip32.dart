@@ -5,6 +5,7 @@ import 'package:hdwallet/src/util/util.dart';
 import 'package:ninja/ninja.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:secp256k1/src/base.dart' as base;
+import 'package:bs58check/bs58check.dart';
 
 class PrivateKey {
   final BigInt privateKey;
@@ -56,6 +57,21 @@ class ExtendedPrivateKey extends PrivateKey {
   ExtendedPrivateKey(BigInt privateKey, this.chainCode, {this.props})
       : super(privateKey);
 
+  factory ExtendedPrivateKey.fromHexString(String key, String chainCode,
+      {ExtendedKeyProps? props}) {
+    final keyInt = BigInt.tryParse(key, radix: 16);
+    if (keyInt == null) {
+      throw ArgumentError('invalid hex key');
+    }
+    final chainCodeInt = BigInt.tryParse(key, radix: 16);
+    if (chainCodeInt == null) {
+      throw ArgumentError('invalid chain code');
+    }
+
+    return ExtendedPrivateKey(keyInt, chainCodeInt.toBytes(outLen: 32),
+        props: props);
+  }
+
   ExtendedPrivateKey generateHardenedChildKey(BigInt index) {
     if (index < hardenBit) {
       throw ArgumentError(
@@ -87,14 +103,14 @@ class ExtendedPrivateKey extends PrivateKey {
     throw UnimplementedError();
   }
 
-  BigInt get checksum {
-    // TODO
-    throw UnimplementedError();
+  Iterable<int> checksum({ExtendedKeyProps? props}) {
+    final encoded = encodeBytes(props: props);
+    return encoded.skip(78);
   }
 
   Uint8List encodeBytes({ExtendedKeyProps? props}) {
     props ??= this.props;
-    if(props == null) {
+    if (props == null) {
       throw Exception('props not found');
     }
     final bytes = Uint8List(82);
@@ -104,14 +120,13 @@ class ExtendedPrivateKey extends PrivateKey {
     bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
     bytes.setRange(45, 78, privateKey.toBytes(outLen: 33));
-    bytes.setRange(78, 82, checksum.toBytes(outLen: 4));
+    bytes.setRange(78, 82, extendedKeyChecksum(bytes.take(78)));
     return bytes;
   }
 
   String encode({ExtendedKeyProps? props}) {
     final bytes = encodeBytes(props: props);
-    // TODO base58 encode
-    throw UnimplementedError();
+    return base58.encode(bytes);
   }
 }
 
@@ -154,10 +169,10 @@ class PublicKey {
 
     if (!compressed) {
       final yBytes = bigIntToBytes(y, outLen: pointLen);
-      final bytes = Uint8List(33);
+      final bytes = Uint8List(65);
       bytes[0] = 0x04;
-      bytes.setAll(1, xBytes);
-      bytes.setAll(pointLen + 1, yBytes);
+      bytes.setRange(1, 33, xBytes);
+      bytes.setRange(33, 65, yBytes);
       return bytes;
     } else {
       // TODO

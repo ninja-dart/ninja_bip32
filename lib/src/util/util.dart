@@ -22,3 +22,10 @@ PublicKey privateKeyToPublicKey(BigInt privateKey) {
       privateKey, base.secp256k1.p, base.secp256k1.a, base.secp256k1.G);
   return PublicKey(point.first, point.last);
 }
+
+Uint8List extendedKeyChecksum(Iterable<int> data) {
+  final intermediate = crypto.sha256.convert(data.toList()).bytes;
+  final result = crypto.sha256.convert(intermediate).bytes;
+  // TODO
+  return result.sublist(0, 4).toUint8List();
+}

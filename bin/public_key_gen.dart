@@ -1,4 +1,5 @@
 import 'package:hdwallet/src/bip32/bip32.dart';
+import 'package:hdwallet/src/util/util.dart';
 import 'package:ninja/ninja.dart';
 import 'package:web3dart/crypto.dart';
 
@@ -9,6 +10,10 @@ void main() {
 
   final public = privateKey.publicKey.encode(compressed: false);
   print(public);
+
+  print(extendedKeyChecksum(List.generate(32, (index) => 100 + index)));
+  
+
 
   /*
   final privateKeyBytes = bigIntToBytes(privateKey);
