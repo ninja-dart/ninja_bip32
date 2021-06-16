@@ -177,8 +177,14 @@ class PublicKey {
       bytes.setRange(33, 65, yBytes);
       return bytes;
     } else {
-      // TODO
-      throw UnimplementedError();
+      final bytes = Uint8List(33);
+      if(y.isOdd) {
+        bytes[0] = 0x03;
+      } else {
+        bytes[0] = 0x02;
+      }
+      bytes.setRange(1, 33, xBytes);
+      return bytes;
     }
   }
 
@@ -204,7 +210,7 @@ class ExtendedPublicKey extends PublicKey {
       throw Exception('props not found');
     }
     final bytes = Uint8List(82);
-    bytes.setRange(0, 4, [0x04, 0x88, 0xad, 0xe4]);
+    bytes.setRange(0, 4, [0x04, 0x88, 0xb2, 0x1e]);
     bytes[4] = props.depth;
     bytes.setRange(5, 9, props.parentFingerprint);
     bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
