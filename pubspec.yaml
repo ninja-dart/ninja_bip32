@@ -6,6 +6,8 @@ version: 1.0.0
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
+publish_to: none
+
 dependencies:
   web3dart: ^2.1.4
   pedantic: ^1.11.0
@@ -13,6 +15,8 @@ dependencies:
   ninja:
   secp256k1: 0.3.0
   bs58check: ^1.0.2
+  hash:
+    git: https://github.com/redDwarf03/hash
 
 dev_dependencies:
   test: ^1.17.8

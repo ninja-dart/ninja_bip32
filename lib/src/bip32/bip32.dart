@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:hdwallet/src/util/util.dart';
 import 'package:ninja/ninja.dart';
 import 'package:web3dart/crypto.dart';
@@ -63,7 +64,7 @@ class ExtendedPrivateKey extends PrivateKey {
     if (keyInt == null) {
       throw ArgumentError('invalid hex key');
     }
-    final chainCodeInt = BigInt.tryParse(key, radix: 16);
+    final chainCodeInt = BigInt.tryParse(chainCode, radix: 16);
     if (chainCodeInt == null) {
       throw ArgumentError('invalid chain code');
     }
@@ -104,11 +105,11 @@ class ExtendedPrivateKey extends PrivateKey {
   }
 
   Iterable<int> checksum({ExtendedKeyProps? props}) {
-    final encoded = encodeBytes(props: props);
+    final encoded = serializeIntoBytes(props: props);
     return encoded.skip(78);
   }
 
-  Uint8List encodeBytes({ExtendedKeyProps? props}) {
+  Uint8List serializeIntoBytes({ExtendedKeyProps? props}) {
     props ??= this.props;
     if (props == null) {
       throw Exception('props not found');
@@ -119,13 +120,14 @@ class ExtendedPrivateKey extends PrivateKey {
     bytes.setRange(5, 9, props.parentFingerprint);
     bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
-    bytes.setRange(45, 78, privateKey.toBytes(outLen: 33));
+    final keyBytes = privateKey.toBytes(outLen: 33);
+    bytes.setRange(45, 78, keyBytes);
     bytes.setRange(78, 82, extendedKeyChecksum(bytes.take(78)));
     return bytes;
   }
 
-  String encode({ExtendedKeyProps? props}) {
-    final bytes = encodeBytes(props: props);
+  String serialize({ExtendedKeyProps? props}) {
+    final bytes = serializeIntoBytes(props: props);
     return base58.encode(bytes);
   }
 }
@@ -183,13 +185,40 @@ class PublicKey {
   String encode({bool compressed = true}) =>
       bytesToHex(encodeIntoBytes(compressed: compressed));
 
+  List<int> get fingerprint => ripemd160(encodeIntoBytes());
+
   @override
   String toString() => 'PublicKey($x, $y)';
 }
 
 class ExtendedPublicKey extends PublicKey {
-  ExtendedPublicKey(BigInt x, BigInt y) : super(x, y);
-  // TODO
+  final Uint8List chainCode;
+  final ExtendedKeyProps? props;
+
+  ExtendedPublicKey(BigInt x, BigInt y, this.chainCode, {this.props})
+      : super(x, y);
+
+  Uint8List serializeIntoBytes({ExtendedKeyProps? props}) {
+    props ??= this.props;
+    if (props == null) {
+      throw Exception('props not found');
+    }
+    final bytes = Uint8List(82);
+    bytes.setRange(0, 4, [0x04, 0x88, 0xad, 0xe4]);
+    bytes[4] = props.depth;
+    bytes.setRange(5, 9, props.parentFingerprint);
+    bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
+    bytes.setRange(13, 45, chainCode);
+    final keyBytes = encodeIntoBytes();
+    bytes.setRange(45, 78, keyBytes);
+    bytes.setRange(78, 82, extendedKeyChecksum(bytes.take(78)));
+    return bytes;
+  }
+
+  String serialize({ExtendedKeyProps? props}) {
+    final bytes = serializeIntoBytes(props: props);
+    return base58.encode(bytes);
+  }
 }
 
 final hardenBit = BigInt.tryParse('0x80000000', radix: 16)!;

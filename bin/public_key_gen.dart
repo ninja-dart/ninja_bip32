@@ -12,8 +12,6 @@ void main() {
   print(public);
 
   print(extendedKeyChecksum(List.generate(32, (index) => 100 + index)));
-  
-
 
   /*
   final privateKeyBytes = bigIntToBytes(privateKey);
