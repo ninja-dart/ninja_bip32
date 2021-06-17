@@ -6,8 +6,23 @@ void main() {
   final privateKey = PrivateKey.fromHexString(
           '5857b8210951449eb64c3463ac01d9a39f125a3cc30cc6c198c623a6bf2750db');
 
-  final public = privateKey.publicKey.encode(compressed: false);
-  print(public);
+  print(privateKey.publicKey);
+
+  {
+    final publicEnc = privateKey.publicKey.encode(compressed: false);
+    print(publicEnc);
+
+    final public = PublicKey.decode(publicEnc);
+    print(public);
+  }
+
+  {
+    final publicEnc = privateKey.publicKey.encode();
+    print(publicEnc);
+
+    final public = PublicKey.decode(publicEnc);
+    print(public);
+  }
 
   print(extendedKeyChecksum(List.generate(32, (index) => 100 + index)));
 
