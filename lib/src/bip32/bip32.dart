@@ -165,6 +165,38 @@ class PublicKey {
 
   PublicKey(this.x, this.y);
 
+  factory PublicKey.decode(String input) {
+    if (input.startsWith('04')) {
+      if (input.length != 130) {
+        throw ArgumentError.value(
+            input, 'input', 'invalid public key string: incorrect length');
+      }
+      final xStr = input.substring(2 * 1, 2 * 33);
+      final yStr = input.substring(2 * 33);
+      final x = BigInt.parse(xStr, radix: 16);
+      final y = BigInt.parse(yStr, radix: 16);
+      return PublicKey(x, y);
+    } else if (input.startsWith('02') || input.startsWith('03')) {
+      if (input.length != 66) {
+        throw ArgumentError.value(
+            input, 'input', 'invalid public key string: incorrect length');
+      }
+      final xStr = input.substring(2 * 1);
+      final x = BigInt.parse(xStr, radix: 16);
+      final ySq = (x.pow(3) + BigInt.from(7)) % base.secp256k1.p;
+      BigInt y = ySq.modPow(
+          (base.secp256k1.p + BigInt.one) ~/ BigInt.from(4), base.secp256k1.p);
+      if(input.startsWith('02') && y.isOdd) {
+        y = (base.secp256k1.p - y) % base.secp256k1.p;
+      } else if(input.startsWith('03') && y.isEven) {
+        y = (base.secp256k1.p - y) % base.secp256k1.p;
+      }
+      return PublicKey(x, y);
+    } else {
+      throw ArgumentError.value(input, 'input', 'invalid public key string');
+    }
+  }
+
   Uint8List encodeIntoBytes({bool compressed = true}) {
     final pointLen = 32;
     final xBytes = bigIntToBytes(x, outLen: pointLen);
@@ -178,7 +210,7 @@ class PublicKey {
       return bytes;
     } else {
       final bytes = Uint8List(33);
-      if(y.isOdd) {
+      if (y.isOdd) {
         bytes[0] = 0x03;
       } else {
         bytes[0] = 0x02;
