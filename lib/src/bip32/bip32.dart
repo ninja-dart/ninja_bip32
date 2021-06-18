@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:hdwallet/src/util/util.dart';
 import 'package:ninja/ninja.dart';
 import 'package:web3dart/crypto.dart';
-import 'package:secp256k1/src/base.dart' as base;
+import 'package:secp256k1/src/base.dart' as curve;
 import 'package:bs58check/bs58check.dart';
 
 class PrivateKey {
@@ -56,7 +55,11 @@ class ExtendedPrivateKey extends PrivateKey {
   final ExtendedKeyProps? props;
 
   ExtendedPrivateKey(BigInt privateKey, this.chainCode, {this.props})
-      : super(privateKey);
+      : super(privateKey) {
+    if(privateKey.bitLength > 32 * 8) {
+      throw Exception('private key too large');
+    }
+  }
 
   factory ExtendedPrivateKey.fromHexString(String key, String chainCode,
       {ExtendedKeyProps? props}) {
@@ -73,6 +76,34 @@ class ExtendedPrivateKey extends PrivateKey {
         props: props);
   }
 
+  factory ExtendedPrivateKey.deserialize(String input) {
+    if (!input.startsWith('xprv')) {
+      throw ArgumentError.value('Invalid xprv');
+    }
+
+    final bytes = base58.decode(input);
+    if (bytes.length != 82) {
+      throw ArgumentError.value('Invalid length');
+    }
+
+    final int depth = bytes[4];
+    final BigInt index = bytesToBigInt(bytes.getRange(9, 13));
+    final Uint8List parentFingerprint = Uint8List.fromList(bytes.sublist(5, 9));
+    final chainCode = Uint8List.fromList(bytes.sublist(13, 45));
+    final privateKey = bytesToBigInt(bytes.getRange(46, 78));
+    final checksum = bytes.getRange(78, 82);
+
+    final ret = ExtendedPrivateKey(privateKey, chainCode,
+        props: ExtendedKeyProps(
+            depth: depth, parentFingerprint: parentFingerprint, index: index));
+
+    if (!iterableEquality.equals(checksum, ret.checksum())) {
+      throw ArgumentError.value('Invalid length');
+    }
+
+    return ret;
+  }
+
   ExtendedPrivateKey generateHardenedChildKey(BigInt index) {
     if (index < hardenBit) {
       throw ArgumentError(
@@ -84,7 +115,7 @@ class ExtendedPrivateKey extends PrivateKey {
     data.setRange(33, 37, index.toBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key =
-        (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % base.secp256k1.n;
+        (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
     return ExtendedPrivateKey(key, chainCode);
   }
@@ -183,13 +214,13 @@ class PublicKey {
       }
       final xStr = input.substring(2 * 1);
       final x = BigInt.parse(xStr, radix: 16);
-      final ySq = (x.pow(3) + BigInt.from(7)) % base.secp256k1.p;
-      BigInt y = ySq.modPow(
-          (base.secp256k1.p + BigInt.one) ~/ BigInt.from(4), base.secp256k1.p);
-      if(input.startsWith('02') && y.isOdd) {
-        y = (base.secp256k1.p - y) % base.secp256k1.p;
-      } else if(input.startsWith('03') && y.isEven) {
-        y = (base.secp256k1.p - y) % base.secp256k1.p;
+      final ySq = (x.pow(3) + BigInt.from(7)) % curve.secp256k1.p;
+      BigInt y = ySq.modPow((curve.secp256k1.p + BigInt.one) ~/ BigInt.from(4),
+          curve.secp256k1.p);
+      if (input.startsWith('02') && y.isOdd) {
+        y = (curve.secp256k1.p - y) % curve.secp256k1.p;
+      } else if (input.startsWith('03') && y.isEven) {
+        y = (curve.secp256k1.p - y) % curve.secp256k1.p;
       }
       return PublicKey(x, y);
     } else {
@@ -258,5 +289,3 @@ class ExtendedPublicKey extends PublicKey {
     return base58.encode(bytes);
   }
 }
-
-final hardenBit = BigInt.tryParse('0x80000000', radix: 16)!;
