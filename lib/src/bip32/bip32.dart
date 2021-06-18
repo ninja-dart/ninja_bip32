@@ -105,7 +105,7 @@ class ExtendedPrivateKey extends PrivateKey {
   }
 
   /// https://learnmeabitcoin.com/technical/extended-keys
-  ExtendedPrivateKey generateHardenedChildKey(int index) {
+  ExtendedPrivateKey deriveHardenedChildKey(int index) {
     if (index < hardenBit) {
       throw ArgumentError(
           'index should be greater than or equal to $hardenBit');
@@ -125,7 +125,7 @@ class ExtendedPrivateKey extends PrivateKey {
             index: index));
   }
 
-  ExtendedPrivateKey generateNonHardenedChildKey(int index) {
+  ExtendedPrivateKey deriveNonHardenedChildKey(int index) {
     if (index >= hardenBit) {
       throw ArgumentError('index should be less than $hardenBit');
     }
@@ -135,7 +135,11 @@ class ExtendedPrivateKey extends PrivateKey {
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key = bytesToBigInt(whole.sublist(0, 32));
     final chainCode = whole.sublist(32);
-    return ExtendedPrivateKey(key, chainCode);
+    return ExtendedPrivateKey(key, chainCode,
+        props: ExtendedKeyProps(
+            depth: props!.depth + 1,
+            parentFingerprint: publicKey.fingerprint,
+            index: index));
   }
 
   Iterable<int> checksum({ExtendedKeyProps? props}) {
