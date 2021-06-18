@@ -7,7 +7,7 @@ void main() {
     '05aae71d7c080474efaab01fa79e96f4c6cfe243237780b0df4bc36106228e31',
     props: ExtendedKeyProps(
       depth: 1,
-      index: BigInt.from(0),
+      index: 0,
       parentFingerprint: BigInt.parse('018c1259', radix: 16).toBytes(outLen: 4),
     ),
   );

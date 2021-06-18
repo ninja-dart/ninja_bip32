@@ -26,6 +26,8 @@ void main() {
 
   print(extendedKeyChecksum(List.generate(32, (index) => 100 + index)));
 
+  print(privateKey.publicKey.fingerprint.toHex());
+
   /*
   final privateKeyBytes = bigIntToBytes(privateKey);
   final publicKey = privateKeyBytesToPublic(privateKeyBytes);

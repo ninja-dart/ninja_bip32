@@ -39,11 +39,11 @@ Uint8List extendedKeyChecksum(Iterable<int> data) {
 Uint8List ripemd160(List<int> msg) =>
     (hasher.RIPEMD160()..update(msg)).digest();
 
-Uint8List publicKeyFingerprint(Uint8List compressedPubKey) {
+List<int> publicKeyFingerprint(List<int> compressedPubKey) {
   final intermediate1 = crypto.sha256.convert(compressedPubKey).bytes;
-  return ripemd160(intermediate1);
+  return ripemd160(intermediate1).sublist(0, 4);
 }
 
-final hardenBit = BigInt.tryParse('0x80000000', radix: 16)!;
+final hardenBit = 0x80000000;
 
 final iterableEquality = IterableEquality();

@@ -41,7 +41,7 @@ class PrivateKey {
 class ExtendedKeyProps {
   final int depth;
   final Uint8List parentFingerprint;
-  final BigInt index;
+  final int index;
 
   ExtendedKeyProps(
       {required this.depth,
@@ -56,7 +56,7 @@ class ExtendedPrivateKey extends PrivateKey {
 
   ExtendedPrivateKey(BigInt privateKey, this.chainCode, {this.props})
       : super(privateKey) {
-    if(privateKey.bitLength > 32 * 8) {
+    if (privateKey.bitLength > 32 * 8) {
       throw Exception('private key too large');
     }
   }
@@ -87,7 +87,7 @@ class ExtendedPrivateKey extends PrivateKey {
     }
 
     final int depth = bytes[4];
-    final BigInt index = bytesToBigInt(bytes.getRange(9, 13));
+    final int index = bytesToBigInt(bytes.getRange(9, 13)).toInt();
     final Uint8List parentFingerprint = Uint8List.fromList(bytes.sublist(5, 9));
     final chainCode = Uint8List.fromList(bytes.sublist(13, 45));
     final privateKey = bytesToBigInt(bytes.getRange(46, 78));
@@ -105,7 +105,7 @@ class ExtendedPrivateKey extends PrivateKey {
   }
 
   /// https://learnmeabitcoin.com/technical/extended-keys
-  ExtendedPrivateKey generateHardenedChildKey(BigInt index) {
+  ExtendedPrivateKey generateHardenedChildKey(int index) {
     if (index < hardenBit) {
       throw ArgumentError(
           'index should be greater than or equal to $hardenBit');
@@ -113,21 +113,25 @@ class ExtendedPrivateKey extends PrivateKey {
     final data = Uint8List(37);
     data[0] = 0x00;
     data.setRange(1, 33, privateKey.toBytes());
-    data.setRange(33, 37, index.toBytes(outLen: 4));
+    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key =
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
-    return ExtendedPrivateKey(key, chainCode);
+    return ExtendedPrivateKey(key, chainCode,
+        /* TODO props: ExtendedKeyProps(
+            depth: props!.depth + 1,
+            parentFingerprint: parentFingerprint,
+            index: index)*/);
   }
 
-  ExtendedPrivateKey generateNonHardenedChildKey(BigInt index) {
+  ExtendedPrivateKey generateNonHardenedChildKey(int index) {
     if (index >= hardenBit) {
       throw ArgumentError('index should be less than $hardenBit');
     }
     final data = Uint8List(37);
     data.setRange(0, 33, publicKey.encodeIntoBytes());
-    data.setRange(33, 37, index.toBytes(outLen: 4));
+    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key = bytesToBigInt(whole.sublist(0, 32));
     final chainCode = whole.sublist(32);
@@ -148,7 +152,7 @@ class ExtendedPrivateKey extends PrivateKey {
     bytes.setRange(0, 4, [0x04, 0x88, 0xad, 0xe4]);
     bytes[4] = props.depth;
     bytes.setRange(5, 9, props.parentFingerprint);
-    bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
+    bytes.setRange(9, 13, BigInt.from(props.index).toBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
     final keyBytes = privateKey.toBytes(outLen: 33);
     bytes.setRange(45, 78, keyBytes);
@@ -253,7 +257,7 @@ class PublicKey {
   String encode({bool compressed = true}) =>
       bytesToHex(encodeIntoBytes(compressed: compressed));
 
-  List<int> get fingerprint => ripemd160(encodeIntoBytes());
+  List<int> get fingerprint => publicKeyFingerprint(encodeIntoBytes());
 
   @override
   String toString() => 'PublicKey($x, $y)';
@@ -275,7 +279,7 @@ class ExtendedPublicKey extends PublicKey {
     bytes.setRange(0, 4, [0x04, 0x88, 0xb2, 0x1e]);
     bytes[4] = props.depth;
     bytes.setRange(5, 9, props.parentFingerprint);
-    bytes.setRange(9, 13, props.index.toBytes(outLen: 4));
+    bytes.setRange(9, 13, BigInt.from(props.index).toBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
     final keyBytes = encodeIntoBytes();
     bytes.setRange(45, 78, keyBytes);

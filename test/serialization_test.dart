@@ -48,7 +48,7 @@ void main() {
             '05aae71d7c080474efaab01fa79e96f4c6cfe243237780b0df4bc36106228e31',
         props: ExtendedKeyProps(
           depth: 1,
-          index: BigInt.from(0),
+          index: 0,
           parentFingerprint:
               BigInt.parse('018c1259', radix: 16).toBytes(outLen: 4),
         ),
@@ -65,7 +65,7 @@ void main() {
             depth: 5,
             parentFingerprint:
                 BigInt.parse('d9d54e0d', radix: 16).toBytes(outLen: 4),
-            index: BigInt.from(100)),
+            index: 100),
         xprv:
             'xprvA42Z1G1J8scF17SNMaLLdSDw5bT4teyahaAQpaumr97ci1e49XHbXfKVbpJP3BHCq3oro9E4h7nHiXk1wybHFreKeGysV4E9npZ3joaumqi');
     tc.execute();
