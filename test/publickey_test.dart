@@ -95,7 +95,8 @@ void main() {
   });
 
   test('PublicKey.fingerPrint', () {
-    final key = PublicKey.decode('0252c616d91a2488c1fd1f0f172e98f7d1f6e51f8f389b2f8d632a8b490d5f6da9');
-    print(key.fingerprint);
+    final key = PublicKey.decode(
+        '0252c616d91a2488c1fd1f0f172e98f7d1f6e51f8f389b2f8d632a8b490d5f6da9');
+    expect(key.fingerprint.toHex(), '018c1259');
   });
 }

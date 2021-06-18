@@ -40,7 +40,7 @@ class PrivateKey {
 
 class ExtendedKeyProps {
   final int depth;
-  final Uint8List parentFingerprint;
+  final List<int> parentFingerprint;
   final int index;
 
   ExtendedKeyProps(
@@ -119,10 +119,10 @@ class ExtendedPrivateKey extends PrivateKey {
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
     return ExtendedPrivateKey(key, chainCode,
-        /* TODO props: ExtendedKeyProps(
+        props: ExtendedKeyProps(
             depth: props!.depth + 1,
-            parentFingerprint: parentFingerprint,
-            index: index)*/);
+            parentFingerprint: publicKey.fingerprint,
+            index: index));
   }
 
   ExtendedPrivateKey generateNonHardenedChildKey(int index) {
