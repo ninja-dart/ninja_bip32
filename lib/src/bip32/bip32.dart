@@ -47,6 +47,11 @@ class ExtendedKeyProps {
       {required this.depth,
       required this.parentFingerprint,
       required this.index});
+
+  String get parentFingerprintHex => parentFingerprint.toHex();
+
+  @override
+  String toString() => '($depth, $parentFingerprintHex, $index)';
 }
 
 class ExtendedPrivateKey extends PrivateKey {
@@ -133,7 +138,8 @@ class ExtendedPrivateKey extends PrivateKey {
     data.setRange(0, 33, publicKey.encodeIntoBytes());
     data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
-    final key = bytesToBigInt(whole.sublist(0, 32));
+    final key =
+        (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
     return ExtendedPrivateKey(key, chainCode,
         props: ExtendedKeyProps(
@@ -193,7 +199,6 @@ class MasterKey extends ExtendedPrivateKey {
     final chainCode = whole.sublist(32).toUint8List();
     return MasterKey(key, chainCode);
   }
-  // TODO
 }
 
 class PublicKey {
