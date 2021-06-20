@@ -13,7 +13,6 @@ void main(List<String> arguments) {
   // print(xpub.serialize());
   // print(xpub.serialize() == 'xpub67ymn1YTdE2iSGXitxUEZeUdHF2FsejJATroeAxVMtzTAK9o3vjmFLrE7TqE1X76iobkVc3p8h3gNzNRTwPeQGYW3CCmYCG8n5ThVkXaQzs');
 
-
   print(PublicKey(
           BigInt.tryParse(
               '92108891948304457725712843772415532106347173564369729809572094165443967697408')!,
