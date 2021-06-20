@@ -17,12 +17,19 @@ class _TestCase {
       required this.xpub});
 
   void execute() {
-    final key = ExtendedPublicKey.deserialize(xpub);
-    expect(key.encode(), public);
-    expect(key.chainCodeHex, chainCode);
-    expect(key.props!.index, props.index);
-    expect(key.props!.depth, props.depth);
-    expect(key.props!.parentFingerprint, props.parentFingerprint);
+    {
+      final key = ExtendedPublicKey.fromHexString(public, chainCode, props);
+      expect(key.serialize(), xpub);
+    }
+
+    {
+      final key = ExtendedPublicKey.deserialize(xpub);
+      expect(key.encode(), public);
+      expect(key.chainCodeHex, chainCode);
+      expect(key.props.index, props.index);
+      expect(key.props.depth, props.depth);
+      expect(key.props.parentFingerprint, props.parentFingerprint);
+    }
   }
 }
 

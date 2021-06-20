@@ -97,10 +97,22 @@ class PublicKey {
 
 class ExtendedPublicKey extends PublicKey {
   final Uint8List chainCode;
-  final ExtendedKeyProps? props;
+  final ExtendedKeyProps props;
 
-  ExtendedPublicKey(BigInt x, BigInt y, this.chainCode, {this.props})
+  ExtendedPublicKey(BigInt x, BigInt y, this.chainCode, this.props)
       : super(x, y);
+
+  factory ExtendedPublicKey.fromHexString(
+      String keyStr, String chainCodeStr, ExtendedKeyProps props) {
+    final publicKey = PublicKey.decode(keyStr);
+
+    final chainCodeInt = BigInt.tryParse(chainCodeStr, radix: 16);
+    if (chainCodeInt == null) {
+      throw ArgumentError('invalid chain code');
+    }
+    return ExtendedPublicKey(
+        publicKey.x, publicKey.y, chainCodeInt.toBytes(outLen: 32), props);
+  }
 
   factory ExtendedPublicKey.deserialize(String input) {
     if (!input.startsWith('xpub')) {
@@ -125,7 +137,7 @@ class ExtendedPublicKey extends PublicKey {
       publicKey.x,
       publicKey.y,
       chainCode,
-      props: ExtendedKeyProps(
+      ExtendedKeyProps(
           depth: depth, parentFingerprint: parentFingerprint, index: index),
     );
 
