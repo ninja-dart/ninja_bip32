@@ -150,16 +150,12 @@ class ExtendedPublicKey extends PublicKey {
 
   String get chainCodeHex => chainCode.toHex(outLen: 64);
 
-  Iterable<int> checksum({ExtendedKeyProps? props}) {
-    final encoded = serializeIntoBytes(props: props);
+  Iterable<int> checksum() {
+    final encoded = serializeIntoBytes();
     return encoded.skip(78);
   }
 
-  Uint8List serializeIntoBytes({ExtendedKeyProps? props}) {
-    props ??= this.props;
-    if (props == null) {
-      throw Exception('props not found');
-    }
+  Uint8List serializeIntoBytes() {
     final bytes = Uint8List(82);
     bytes.setRange(0, 4, [0x04, 0x88, 0xb2, 0x1e]);
     bytes[4] = props.depth;
@@ -172,8 +168,8 @@ class ExtendedPublicKey extends PublicKey {
     return bytes;
   }
 
-  String serialize({ExtendedKeyProps? props}) {
-    final bytes = serializeIntoBytes(props: props);
+  String serialize() {
+    final bytes = serializeIntoBytes();
     return base58.encode(bytes).padLeft(64, '0');
   }
 }

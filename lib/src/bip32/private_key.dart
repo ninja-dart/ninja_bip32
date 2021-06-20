@@ -58,17 +58,17 @@ class ExtendedKeyProps {
 class ExtendedPrivateKey extends PrivateKey {
   final Uint8List chainCode;
 
-  final ExtendedKeyProps? props;
+  final ExtendedKeyProps props;
 
-  ExtendedPrivateKey(BigInt privateKey, this.chainCode, {this.props})
+  ExtendedPrivateKey(BigInt privateKey, this.chainCode, this.props)
       : super(privateKey) {
     if (privateKey.bitLength > 32 * 8) {
       throw Exception('private key too large');
     }
   }
 
-  factory ExtendedPrivateKey.fromHexString(String key, String chainCode,
-      {ExtendedKeyProps? props}) {
+  factory ExtendedPrivateKey.fromHexString(
+      String key, String chainCode, ExtendedKeyProps props) {
     final keyInt = BigInt.tryParse(key, radix: 16);
     if (keyInt == null) {
       throw ArgumentError('invalid hex key');
@@ -78,8 +78,7 @@ class ExtendedPrivateKey extends PrivateKey {
       throw ArgumentError('invalid chain code');
     }
 
-    return ExtendedPrivateKey(keyInt, chainCodeInt.toBytes(outLen: 32),
-        props: props);
+    return ExtendedPrivateKey(keyInt, chainCodeInt.toBytes(outLen: 32), props);
   }
 
   factory ExtendedPrivateKey.deserialize(String input) {
@@ -99,8 +98,10 @@ class ExtendedPrivateKey extends PrivateKey {
     final privateKey = bytesToBigInt(bytes.getRange(46, 78));
     final checksum = bytes.getRange(78, 82);
 
-    final ret = ExtendedPrivateKey(privateKey, chainCode,
-        props: ExtendedKeyProps(
+    final ret = ExtendedPrivateKey(
+        privateKey,
+        chainCode,
+        ExtendedKeyProps(
             depth: depth, parentFingerprint: parentFingerprint, index: index));
 
     if (!iterableEquality.equals(checksum, ret.checksum())) {
@@ -130,9 +131,11 @@ class ExtendedPrivateKey extends PrivateKey {
     final key =
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
-    return ExtendedPrivateKey(key, chainCode,
-        props: ExtendedKeyProps(
-            depth: props!.depth + 1,
+    return ExtendedPrivateKey(
+        key,
+        chainCode,
+        ExtendedKeyProps(
+            depth: props.depth + 1,
             parentFingerprint: publicKey.fingerprint,
             index: index));
   }
@@ -148,23 +151,21 @@ class ExtendedPrivateKey extends PrivateKey {
     final key =
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
     final chainCode = whole.sublist(32);
-    return ExtendedPrivateKey(key, chainCode,
-        props: ExtendedKeyProps(
-            depth: props!.depth + 1,
+    return ExtendedPrivateKey(
+        key,
+        chainCode,
+        ExtendedKeyProps(
+            depth: props.depth + 1,
             parentFingerprint: publicKey.fingerprint,
             index: index));
   }
 
-  Iterable<int> checksum({ExtendedKeyProps? props}) {
-    final encoded = serializeIntoBytes(props: props);
+  Iterable<int> checksum() {
+    final encoded = serializeIntoBytes();
     return encoded.skip(78);
   }
 
-  Uint8List serializeIntoBytes({ExtendedKeyProps? props}) {
-    props ??= this.props;
-    if (props == null) {
-      throw Exception('props not found');
-    }
+  Uint8List serializeIntoBytes() {
     final bytes = Uint8List(82);
     bytes.setRange(0, 4, [0x04, 0x88, 0xad, 0xe4]);
     bytes[4] = props.depth;
@@ -177,14 +178,19 @@ class ExtendedPrivateKey extends PrivateKey {
     return bytes;
   }
 
-  String serialize({ExtendedKeyProps? props}) {
-    final bytes = serializeIntoBytes(props: props);
+  String serialize() {
+    final bytes = serializeIntoBytes();
     return base58.encode(bytes);
   }
 }
 
 class MasterKey extends ExtendedPrivateKey {
-  MasterKey(BigInt key, Uint8List chainCode) : super(key, chainCode);
+  MasterKey(BigInt key, Uint8List chainCode)
+      : super(
+            key,
+            chainCode,
+            ExtendedKeyProps(
+                depth: 0, parentFingerprint: [0, 0, 0, 0], index: 0));
 
   factory MasterKey.fromSeed(Uint8List seed,
       {/* String | List<int> */ salt = 'Bitcoin seed'}) {

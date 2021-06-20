@@ -24,7 +24,7 @@ class _TestCase {
     final key = ExtendedPrivateKey.fromHexString(
       private,
       chainCode,
-      props: props,
+      props,
     );
 
     final serialized = key.serialize();
