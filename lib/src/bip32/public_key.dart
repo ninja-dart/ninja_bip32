@@ -45,6 +45,16 @@ class PublicKey {
     }
   }
 
+  factory PublicKey.decodeBytes(Iterable<int> bytes, {bool compressed = true}) {
+    String str;
+    if (compressed) {
+      str = bytes.toHex(outLen: 66);
+    } else {
+      str = bytes.toHex(outLen: 130);
+    }
+    return PublicKey.decode(str);
+  }
+
   Uint8List encodeIntoBytes({bool compressed = true}) {
     final pointLen = 32;
     final xBytes = bigIntToBytes(x, outLen: pointLen);
@@ -106,17 +116,31 @@ class ExtendedPublicKey extends PublicKey {
     final int index = bytesToBigInt(bytes.getRange(9, 13)).toInt();
     final Uint8List parentFingerprint = Uint8List.fromList(bytes.sublist(5, 9));
     final chainCode = Uint8List.fromList(bytes.sublist(13, 45));
-    final publicKey = bytesToBigInt(bytes.getRange(45, 78));
+    final publicKeyBytes = bytes.getRange(45, 78);
     final checksum = bytes.getRange(78, 82);
 
-    /* final ret = ExtendedPublicKey(x, y, chainCode);
+    final publicKey = PublicKey.decodeBytes(publicKeyBytes);
+
+    final ret = ExtendedPublicKey(
+      publicKey.x,
+      publicKey.y,
+      chainCode,
+      props: ExtendedKeyProps(
+          depth: depth, parentFingerprint: parentFingerprint, index: index),
+    );
 
     if (!iterableEquality.equals(checksum, ret.checksum())) {
       throw ArgumentError.value('Invalid length');
-    } */
+    }
 
-    // TODO
-    throw UnimplementedError();
+    return ret;
+  }
+
+  String get chainCodeHex => chainCode.toHex(outLen: 64);
+
+  Iterable<int> checksum({ExtendedKeyProps? props}) {
+    final encoded = serializeIntoBytes(props: props);
+    return encoded.skip(78);
   }
 
   Uint8List serializeIntoBytes({ExtendedKeyProps? props}) {

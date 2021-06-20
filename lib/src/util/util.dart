@@ -11,9 +11,27 @@ List<int> hmacSHA512(List<int> key, List<int> data) {
   return hmac.convert(data).bytes;
 }
 
+extension IntIterableToUint8List on Iterable<int> {
+  Uint8List toUint8List() => Uint8List.fromList(this.toList());
+
+  String toHex({int? outLen}) {
+    String ret = bytesToBigInt(this).toRadixString(16);
+    ret = ret.padLeft(outLen ?? 0, '0');
+    return ret;
+  }
+}
+
 extension IntListToUint8List on List<int> {
   Uint8List toUint8List() => Uint8List.fromList(this);
 
+  String toHex({int? outLen}) {
+    String ret = bytesToBigInt(this).toRadixString(16);
+    ret = ret.padLeft(outLen ?? 0, '0');
+    return ret;
+  }
+}
+
+extension Uint8ListTo on Uint8List {
   String toHex({int? outLen}) {
     String ret = bytesToBigInt(this).toRadixString(16);
     ret = ret.padLeft(outLen ?? 0, '0');
