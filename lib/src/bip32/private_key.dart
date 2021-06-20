@@ -182,12 +182,36 @@ class ExtendedPrivateKey extends PrivateKey {
     final bytes = serializeIntoBytes();
     return base58.encode(bytes);
   }
+
+  ExtendedPrivateKey derivePath(String path) {
+    if (!pathRegExp.hasMatch(path)) {
+      throw ArgumentError.value(path, 'path', 'Invalid path');
+    }
+    path = path.substring(1);
+    final part = path.split('/')[0];
+    path = path.substring(part.length);
+    ExtendedPrivateKey ret;
+    if (part.endsWith("'")) {
+      final index =
+          int.tryParse(part.substring(0, part.length - 1))! + hardenBit;
+      ret = deriveHardenedChildKey(index);
+    } else {
+      final index = int.tryParse(part)!;
+      ret = deriveNonHardenedChildKey(index);
+    }
+    if (path.isEmpty) {
+      return ret;
+    }
+    return ret.derivePath(path);
+  }
+
+  static final pathRegExp = RegExp(r'''^(/[0-9]+'?)*$''');
 }
 
 class MasterKey extends ExtendedPrivateKey {
-  MasterKey(BigInt key, Uint8List chainCode)
+  MasterKey(BigInt privateKey, Uint8List chainCode)
       : super(
-            key,
+            privateKey,
             chainCode,
             ExtendedKeyProps(
                 depth: 0, parentFingerprint: [0, 0, 0, 0], index: 0));
@@ -212,4 +236,50 @@ class MasterKey extends ExtendedPrivateKey {
     final chainCode = whole.sublist(32).toUint8List();
     return MasterKey(key, chainCode);
   }
+
+  factory MasterKey.deserialize(String xprv) {
+    final xp = ExtendedPrivateKey.deserialize(xprv);
+
+    if (xp.props.depth != 0) {
+      throw Exception('Invalid depth');
+    }
+
+    if (xp.props.index != 0) {
+      throw Exception('Invalid index');
+    }
+
+    if (xp.props.parentFingerprintHex != '00000000') {
+      throw Exception('Invalid parent fingerprint');
+    }
+
+    return MasterKey(xp.privateKey, xp.chainCode);
+  }
+
+  @override
+  ExtendedPrivateKey derivePath(String path) {
+    if (!pathRegExp.hasMatch(path)) {
+      throw ArgumentError.value(path, 'path', 'Invalid path');
+    }
+    if (path == 'm') {
+      return this;
+    }
+    path = path.substring(2);
+    final part = path.split('/')[0];
+    path = path.substring(part.length);
+    ExtendedPrivateKey ret;
+    if (part.endsWith("'")) {
+      final index =
+          int.tryParse(part.substring(0, part.length - 1))! + hardenBit;
+      ret = deriveHardenedChildKey(index);
+    } else {
+      final index = int.tryParse(part)!;
+      ret = deriveNonHardenedChildKey(index);
+    }
+    if (path.isEmpty) {
+      return ret;
+    }
+    return ret.derivePath(path);
+  }
+
+  static final pathRegExp = RegExp(r'''^m(/[0-9]+'?)*$''');
 }
