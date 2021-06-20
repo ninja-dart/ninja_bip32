@@ -1,7 +1,8 @@
 import 'package:hdwallet/src/bip32/bip32.dart';
 
 void main() {
-  final master = ExtendedPrivateKey.deserialize('xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73');
+  final master = ExtendedPrivateKey.deserialize(
+      'xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73');
   final k = master.deriveHardenedChildKey(0x80000001);
   print(k.serialize());
 

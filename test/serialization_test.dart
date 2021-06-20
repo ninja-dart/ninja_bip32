@@ -32,7 +32,7 @@ class _TestCase {
 
     final xprvDeserialized = ExtendedPrivateKey.deserialize(serialized);
     expect(xprvDeserialized.privateKey.toRadixString(16), private);
-    expect(xprvDeserialized.chainCode.toHex(), chainCode);
+    expect(xprvDeserialized.chainCodeHex, chainCode);
     expect(xprvDeserialized.props!.index, props.index);
     expect(xprvDeserialized.props!.depth, props.depth);
     expect(xprvDeserialized.props!.parentFingerprint, props.parentFingerprint);
