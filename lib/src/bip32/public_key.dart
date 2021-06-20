@@ -155,6 +155,19 @@ class ExtendedPublicKey extends PublicKey {
     return encoded.skip(78);
   }
 
+  PublicKey generateChildPublicKey(int index) {
+    if (index >= hardenBit) {
+      throw ArgumentError('index should be less than $hardenBit');
+    }
+    final data = Uint8List(37);
+    data.setRange(0, 33, encodeIntoBytes());
+    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
+    final whole = Uint8List.fromList(hmacSHA512(chainCode, data));
+
+    final il = bytesToBigInt(whole.sublist(0, 32));
+    return addScalar(x, y, il);
+  }
+
   Uint8List serializeIntoBytes() {
     final bytes = Uint8List(82);
     bytes.setRange(0, 4, [0x04, 0x88, 0xb2, 0x1e]);

@@ -113,9 +113,9 @@ class ExtendedPrivateKey extends PrivateKey {
 
   String get chainCodeHex => chainCode.toHex(outLen: 64);
 
-  /* TODO ExtendedPublicKey get extendedPublicKey => {
-    return ExtendedPublicKey(privateKey, chainCode);
-  }*/
+  ExtendedPublicKey get extendedPublicKey {
+    return ExtendedPublicKey(publicKey.x, publicKey.y, chainCode, props);
+  }
 
   /// https://learnmeabitcoin.com/technical/extended-keys
   ExtendedPrivateKey deriveHardenedChildKey(int index) {

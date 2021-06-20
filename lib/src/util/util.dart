@@ -66,3 +66,10 @@ List<int> publicKeyFingerprint(List<int> compressedPubKey) {
 final hardenBit = 0x80000000;
 
 final iterableEquality = IterableEquality();
+
+PublicKey addScalar(BigInt x1, BigInt y1, BigInt scalar) {
+  final p1 = curve.getPointByBig(
+      scalar, curve.secp256k1.p, curve.secp256k1.a, curve.secp256k1.G);
+  final ret = curve.addDiffPoint(x1, y1, p1.first, p1.last, curve.secp256k1.p);
+  return PublicKey(ret.first, ret.last);
+}
