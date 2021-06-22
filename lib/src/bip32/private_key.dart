@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:bs58check/bs58check.dart';
 import 'package:secp256k1/src/base.dart' as curve;
 
-import 'package:hdwallet/src/util/util.dart';
+import 'package:ninja_bip32/src/util/util.dart';
 import 'package:ninja/ninja.dart';
 
 import 'public_key.dart';

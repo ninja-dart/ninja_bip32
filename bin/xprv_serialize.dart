@@ -1,5 +1,5 @@
-import 'package:hdwallet/src/bip32/bip32.dart';
-import 'package:hdwallet/src/util/util.dart';
+import 'package:ninja_bip32/src/bip32/bip32.dart';
+import 'package:ninja_bip32/src/util/util.dart';
 
 void main() {
   final xprv = ExtendedPrivateKey.fromHexString(

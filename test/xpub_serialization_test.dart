@@ -1,7 +1,7 @@
-import 'package:hdwallet/src/bip32/bip32.dart';
+import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
-import 'package:hdwallet/src/util/util.dart';
+import 'package:ninja_bip32/src/util/util.dart';
 
 class _TestCase {
   final String public;

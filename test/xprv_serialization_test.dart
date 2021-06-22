@@ -1,6 +1,6 @@
-import 'package:hdwallet/src/bip32/bip32.dart';
+import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:test/test.dart';
-import 'package:hdwallet/src/util/util.dart';
+import 'package:ninja_bip32/src/util/util.dart';
 
 class _TestCase {
   /// WIF to hex: https://privatekeys.pw/
@@ -33,9 +33,9 @@ class _TestCase {
     final xprvDeserialized = ExtendedPrivateKey.deserialize(serialized);
     expect(xprvDeserialized.privateKey.toRadixString(16), private);
     expect(xprvDeserialized.chainCodeHex, chainCode);
-    expect(xprvDeserialized.props!.index, props.index);
-    expect(xprvDeserialized.props!.depth, props.depth);
-    expect(xprvDeserialized.props!.parentFingerprint, props.parentFingerprint);
+    expect(xprvDeserialized.props.index, props.index);
+    expect(xprvDeserialized.props.depth, props.depth);
+    expect(xprvDeserialized.props.parentFingerprint, props.parentFingerprint);
   }
 }
 

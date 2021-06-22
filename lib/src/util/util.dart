@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:hdwallet/src/bip32/bip32.dart';
+import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:secp256k1/src/base.dart' as curve;
 import 'package:ninja/ninja.dart';
 import 'package:hash/hash.dart' as hasher;
@@ -12,7 +12,7 @@ List<int> hmacSHA512(List<int> key, List<int> data) {
 }
 
 extension IntIterableToUint8List on Iterable<int> {
-  Uint8List toUint8List() => Uint8List.fromList(this.toList());
+  Uint8List toUint8List() => Uint8List.fromList(toList());
 
   String toHex({int? outLen}) {
     String ret = bytesToBigInt(this).toRadixString(16);

@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:hdwallet/src/bip32/bip32.dart';
+import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
