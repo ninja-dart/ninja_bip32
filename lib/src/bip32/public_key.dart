@@ -111,7 +111,7 @@ class ExtendedPublicKey extends PublicKey {
       throw ArgumentError('invalid chain code');
     }
     return ExtendedPublicKey(
-        publicKey.x, publicKey.y, chainCodeInt.toBytes(outLen: 32), props);
+        publicKey.x, publicKey.y, chainCodeInt.asBytes(outLen: 32), props);
   }
 
   factory ExtendedPublicKey.deserialize(String input) {
@@ -161,7 +161,7 @@ class ExtendedPublicKey extends PublicKey {
     }
     final data = Uint8List(37);
     data.setRange(0, 33, encodeIntoBytes());
-    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
+    data.setRange(33, 37, BigInt.from(index).asBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(chainCode, data));
 
     final il = bytesToBigInt(whole.sublist(0, 32));
@@ -173,7 +173,7 @@ class ExtendedPublicKey extends PublicKey {
     bytes.setRange(0, 4, [0x04, 0x88, 0xb2, 0x1e]);
     bytes[4] = props.depth;
     bytes.setRange(5, 9, props.parentFingerprint);
-    bytes.setRange(9, 13, BigInt.from(props.index).toBytes(outLen: 4));
+    bytes.setRange(9, 13, BigInt.from(props.index).asBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
     final keyBytes = encodeIntoBytes();
     bytes.setRange(45, 78, keyBytes);

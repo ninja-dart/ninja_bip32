@@ -9,11 +9,9 @@ environment:
 dependencies:
   pedantic: ^1.11.1
   crypto:
-  ninja: ^3.0.2
+  ninja: ^3.0.4
   secp256k1: 0.3.0
   bs58check: ^1.0.2
-  hash:
-    git: https://github.com/redDwarf03/hash
   collection: ^1.15.0
 
 dev_dependencies:

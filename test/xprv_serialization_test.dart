@@ -1,6 +1,6 @@
 import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:test/test.dart';
-import 'package:ninja_bip32/src/util/util.dart';
+import 'package:ninja/ninja.dart';
 
 class _TestCase {
   /// WIF to hex: https://privatekeys.pw/
@@ -50,7 +50,7 @@ void main() {
               depth: 1,
               index: 0,
               parentFingerprint:
-                  BigInt.parse('018c1259', radix: 16).toBytes(outLen: 4),
+                  BigInt.parse('018c1259', radix: 16).asBytes(outLen: 4),
             ),
             xprv:
                 'xprv9tuogRdb5YTgcL3P8Waj7REqDuQx4sXcodQaWTtEVFEp6yRKh1CjrWfXChnhgHeLDuXxo2auDZegMiVMGGxwxcrb2PmiGyCngLxvLeGsZRq')
@@ -64,7 +64,7 @@ void main() {
             props: ExtendedKeyProps(
                 depth: 5,
                 parentFingerprint:
-                    BigInt.parse('d9d54e0d', radix: 16).toBytes(outLen: 4),
+                    BigInt.parse('d9d54e0d', radix: 16).asBytes(outLen: 4),
                 index: 100),
             xprv:
                 'xprvA42Z1G1J8scF17SNMaLLdSDw5bT4teyahaAQpaumr97ci1e49XHbXfKVbpJP3BHCq3oro9E4h7nHiXk1wybHFreKeGysV4E9npZ3joaumqi')
@@ -78,7 +78,7 @@ void main() {
             props: ExtendedKeyProps(
                 depth: 1,
                 parentFingerprint:
-                    BigInt.parse('0c5f9a1e', radix: 16).toBytes(outLen: 4),
+                    BigInt.parse('0c5f9a1e', radix: 16).asBytes(outLen: 4),
                 index: 0),
             xprv:
                 'xprv9tzRNW1ZnrURDnTFnvwECWXtjDBmUC1SoEwCqnYsoZTUHWpeWPRWhYXkGApgPrQBYZpE31yx89iwMBrKJ8ihEdcpSwRPNcPrdxuzCZ7Fwek')

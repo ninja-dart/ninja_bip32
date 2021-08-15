@@ -1,5 +1,5 @@
 import 'package:ninja_bip32/src/bip32/bip32.dart';
-import 'package:ninja_bip32/src/util/util.dart';
+import 'package:ninja/ninja.dart';
 
 void main() {
   final xprv = ExtendedPrivateKey.fromHexString(
@@ -8,7 +8,7 @@ void main() {
     ExtendedKeyProps(
       depth: 1,
       index: 0,
-      parentFingerprint: BigInt.parse('018c1259', radix: 16).toBytes(outLen: 4),
+      parentFingerprint: BigInt.parse('018c1259', radix: 16).asBytes(outLen: 4),
     ),
   );
   print(xprv.serialize());

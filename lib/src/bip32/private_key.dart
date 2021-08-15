@@ -78,7 +78,7 @@ class ExtendedPrivateKey extends PrivateKey {
       throw ArgumentError('invalid chain code');
     }
 
-    return ExtendedPrivateKey(keyInt, chainCodeInt.toBytes(outLen: 32), props);
+    return ExtendedPrivateKey(keyInt, chainCodeInt.asBytes(outLen: 32), props);
   }
 
   factory ExtendedPrivateKey.deserialize(String input) {
@@ -125,8 +125,8 @@ class ExtendedPrivateKey extends PrivateKey {
     }
     final data = Uint8List(37);
     data[0] = 0x00;
-    data.setRange(1, 33, privateKey.toBytes());
-    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
+    data.setRange(1, 33, privateKey.asBytes());
+    data.setRange(33, 37, BigInt.from(index).asBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key =
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
@@ -146,7 +146,7 @@ class ExtendedPrivateKey extends PrivateKey {
     }
     final data = Uint8List(37);
     data.setRange(0, 33, publicKey.encodeIntoBytes());
-    data.setRange(33, 37, BigInt.from(index).toBytes(outLen: 4));
+    data.setRange(33, 37, BigInt.from(index).asBytes(outLen: 4));
     final whole = Uint8List.fromList(hmacSHA512(this.chainCode, data));
     final key =
         (bytesToBigInt(whole.sublist(0, 32)) + privateKey) % curve.secp256k1.n;
@@ -170,9 +170,9 @@ class ExtendedPrivateKey extends PrivateKey {
     bytes.setRange(0, 4, [0x04, 0x88, 0xad, 0xe4]);
     bytes[4] = props.depth;
     bytes.setRange(5, 9, props.parentFingerprint);
-    bytes.setRange(9, 13, BigInt.from(props.index).toBytes(outLen: 4));
+    bytes.setRange(9, 13, BigInt.from(props.index).asBytes(outLen: 4));
     bytes.setRange(13, 45, chainCode);
-    final keyBytes = privateKey.toBytes(outLen: 33);
+    final keyBytes = privateKey.asBytes(outLen: 33);
     bytes.setRange(45, 78, keyBytes);
     bytes.setRange(78, 82, extendedKeyChecksum(bytes.take(78)));
     return bytes;

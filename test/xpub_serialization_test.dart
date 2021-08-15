@@ -1,7 +1,7 @@
 import 'package:ninja_bip32/src/bip32/bip32.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
-import 'package:ninja_bip32/src/util/util.dart';
+import 'package:ninja/ninja.dart';
 
 class _TestCase {
   final String public;
@@ -43,7 +43,7 @@ void main() {
             props: ExtendedKeyProps(
                 depth: 1,
                 parentFingerprint:
-                    BigInt.parse('0c5f9a1e', radix: 16).toBytes(outLen: 4),
+                    BigInt.parse('0c5f9a1e', radix: 16).asBytes(outLen: 4),
                 index: 0),
             xpub:
                 'xpub67ymn1YTdE2iSGXitxUEZeUdHF2FsejJATroeAxVMtzTAK9o3vjmFLrE7TqE1X76iobkVc3p8h3gNzNRTwPeQGYW3CCmYCG8n5ThVkXaQzs')
